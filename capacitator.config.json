@@ -1,0 +1,15 @@
+{
+  "appId": "com.ac3d1t.fenn",
+  "appName": "fenn",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "StatusBar": {
+      "style": "light",
+      "backgroundColor": "#e8e8e8"
+    },
+    "Haptics": {
+      "enabled": true
+    }
+  }
+}
