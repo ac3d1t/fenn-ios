@@ -44,6 +44,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
+          rm -rf ~/.gradle/caches
           ./gradlew assembleRelease
 
       - name: Rename APK
