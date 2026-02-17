@@ -64,10 +64,10 @@ jobs:
           name: fenn-ios
           path: fenn.ipa
       
-      - name: Create IPA from App
+      - - name: Create IPA from App
         run: |
           cd ios/App/build/App.xcarchive/Products/Applications
-          mkdir Payload
+          mkdir -p Payload
           cp -r App.app Payload/
           zip -r fenn.ipa Payload
           cp fenn.ipa $GITHUB_WORKSPACE/fenn.ipa
