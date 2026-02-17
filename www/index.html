@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+  <title>fenn</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    :root {
+      --bg: #e8e8e8;
+      --shadow-dark: #c5c5c5;
+      --shadow-light: #ffffff;
+      --fg: #555;
+      --fg-dark: #333;
+      --muted: #aaa;
+      --accent: #7a9ccf;
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+    
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+    
+    .app { display: flex; height: 100%; }
+    
+    /* sidebar */
+    .sidebar {
+      width: 190px; min-width: 190px;
+      background: var(--bg);
+      box-shadow: 3px 0 14px var(--shadow-dark);
+      padding: 1rem 0.85rem;
+      display: flex; flex-direction: column; gap: 0.6rem;
+      overflow-y: auto;
+    }
+    .sidebar.hidden { display: none; }
+    
+    .logo { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.05em; color: #2a2a2a; }
+    
+    .search-bar {
+      height: 30px; background: var(--bg); border-radius: 50px;
+      box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      padding: 0 0.8rem; display: flex; align-items: center; gap: 0.4rem;
+      border: none; font-size: 0.62rem; color: var(--fg);
+    }
+    
+    .divider { height: 1px; background: var(--shadow-dark); opacity: 0.35; }
+    
+    .tabs { display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; flex: 1; }
+    
+    .tab {
+      background: var(--bg); border-radius: 10px;
+      box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+      padding: 0.45rem 0.6rem; display: flex; align-items: center; gap: 0.5rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab.active {
+      box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+    }
+    
+    .tab-favicon { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; background: var(--accent); }
+    .tab-info { flex: 1; overflow: hidden; }
+    .tab-title { font-size: 0.63rem; font-weight: 700; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tab-url { font-size: 0.52rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .sidebar-btns { display: flex; gap: 0.4rem; margin-top: auto; }
+    .sidebar-btn {
+      width: 30px; height: 30px; background: var(--bg); border-radius: 9px;
+      box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    
+    /* main area */
+    .main { flex: 1; display: flex; flex-direction: column; }
+    
+    .navbar {
+      height: 34px; background: var(--bg);
+      box-shadow: 0 2px 8px var(--shadow-dark);
+      display: flex; align-items: center; gap: 0.4rem; padding: 0 0.7rem;
+    }
+    
+    .nav-btn {
+      width: 20px; height: 20px; background: var(--bg); border-radius: 6px;
+      box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+      border: none; flex-shrink: 0; font-size: 0.8rem; cursor: pointer;
+    }
+    .nav-btn:disabled { opacity: 0.4; }
+    
+    .url-bar {
+      flex: 1; height: 20px; background: var(--bg); border-radius: 50px;
+      box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+      padding: 0 0.8rem; border: none; font-size: 0.58rem; color: #888;
+    }
+    
+    .content {
+      flex: 1; background: #fff; overflow: hidden; position: relative;
+    }
+    
+    iframe {
+      width: 100%; height: 100%; border: none;
+    }
+    
+    /* panels */
+    .panel {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .panel.active { display: flex; }
+    
+    .panel-content {
+      background: var(--bg); border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 1.5rem; width: 90%; max-width: 400px; max-height: 80%;
+      overflow-y: auto; position: relative;
+    }
+    
+    .panel-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; }
+    .panel-close {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 30px; height: 30px; background: var(--bg); border-radius: 50%;
+      box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+      border: none; font-size: 1rem; cursor: pointer;
+    }
+    
+    .bookmark-item, .setting-item {
+      padding: 0.7rem; margin-bottom: 0.5rem; background: var(--bg); border-radius: 10px;
+      box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    
+    .setting-label { flex: 1; font-size: 0.8rem; }
+    
+    select {
+      background: var(--bg); border: none; border-radius: 8px;
+      box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+      padding: 0.4rem 0.6rem; font-size: 0.75rem;
+    }
+    
+    input[type="checkbox"] {
+      width: 40px; height: 24px; appearance: none; background: var(--shadow-dark); border-radius: 12px;
+      position: relative; cursor: pointer;
+      box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    input[type="checkbox"]::after {
+      content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px; transition: 0.3s;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    input[type="checkbox"]:checked {
+      background: var(--accent);
+    }
+    input[type="checkbox"]:checked::after {
+      left: 19px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar" id="sidebar">
+    <div class="logo">fenn</div>
+    <input class="search-bar" id="searchBar" placeholder="search the web..." />
+    <div class="divider"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="sidebar-btns">
+      <button class="sidebar-btn" onclick="openBookmarks()">♥</button>
+      <button class="sidebar-btn" onclick="openSettings()">⚙</button>
+      <button class="sidebar-btn" onclick="newTab()">+</button>
+    </div>
+  </div>
+  
+  <div class="main">
+    <div class="navbar">
+      <button class="nav-btn" id="backBtn" onclick="goBack()" disabled>◀</button>
+      <button class="nav-btn" id="forwardBtn" onclick="goForward()" disabled>▶</button>
+      <button class="nav-btn" onclick="reload()">↻</button>
+      <input class="url-bar" id="urlBar" />
+      <button class="nav-btn" id="bookmarkBtn" onclick="toggleBookmark()">♡</button>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- bookmarks panel -->
+<div class="panel" id="bookmarksPanel">
+  <div class="panel-content">
+    <button class="panel-close" onclick="closePanel('bookmarksPanel')">×</button>
+    <div class="panel-title">bookmarks</div>
+    <div id="bookmarksList"></div>
+  </div>
+</div>
+
+<!-- settings panel -->
+<div class="panel" id="settingsPanel">
+  <div class="panel-content">
+    <button class="panel-close" onclick="closePanel('settingsPanel')">×</button>
+    <div class="panel-title">settings</div>
+    
+    <div class="setting-item">
+      <span class="setting-label">search engine</span>
+      <select id="engineSelect" onchange="saveSettings()">
+        <option value="google">Google</option>
+        <option value="duckduckgo">DuckDuckGo</option>
+        <option value="brave">Brave</option>
+        <option value="ecosia">Ecosia</option>
+        <option value="bing">Bing</option>
+        <option value="yahoo">Yahoo</option>
+        <option value="startpage">Startpage</option>
+      </select>
+    </div>
+    
+    <div class="setting-item">
+      <span class="setting-label">dark mode</span>
+      <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" />
+    </div>
+    
+    <div class="setting-item">
+      <span class="setting-label">hide sidebar</span>
+      <input type="checkbox" id="sidebarToggle" onchange="toggleSidebar()" />
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { Preferences } from '@capacitor/preferences';
+  import { Haptics, ImpactStyle } from '@capacitor/haptics';
+  
+  const ENGINES = {
+    google: 'https://www.google.com/search?q=',
+    duckduckgo: 'https://duckduckgo.com/?q=',
+    brave: 'https://search.brave.com/search?q=',
+    ecosia: 'https://www.ecosia.org/search?q=',
+    bing: 'https://www.bing.com/search?q=',
+    yahoo: 'https://search.yahoo.com/search?p=',
+    startpage: 'https://www.startpage.com/do/search?q='
+  };
+  
+  let tabs = [];
+  let activeTabId = null;
+  let bookmarks = [];
+  let settings = { engine: 'google', darkMode: false, sidebarHidden: false };
+  
+  // haptic feedback helper
+  async function haptic() {
+    try { await Haptics.impact({ style: ImpactStyle.Light }); } catch(e) {}
+  }
+  
+  // load saved state
+  async function loadState() {
+    try {
+      const savedTabs = await Preferences.get({ key: 'fenn_tabs' });
+      const savedActive = await Preferences.get({ key: 'fenn_activeTab' });
+      const savedBookmarks = await Preferences.get({ key: 'fenn_bookmarks' });
+      const savedSettings = await Preferences.get({ key: 'fenn_settings' });
+      
+      if (savedTabs.value) tabs = JSON.parse(savedTabs.value);
+      if (savedActive.value) activeTabId = savedActive.value;
+      if (savedBookmarks.value) bookmarks = JSON.parse(savedBookmarks.value);
+      if (savedSettings.value) settings = JSON.parse(savedSettings.value);
+      
+      if (tabs.length === 0) {
+        tabs = [{ id: 'tab_' + Date.now(), url: 'https://www.google.com', title: 'Google', favicon: '' }];
+        activeTabId = tabs[0].id;
+      }
+      
+      applySettings();
+      renderTabs();
+      switchTab(activeTabId);
+    } catch(e) {
+      console.error('Load error:', e);
+    }
+  }
+  
+  // save state
+  async function saveState() {
+    try {
+      await Preferences.set({ key: 'fenn_tabs', value: JSON.stringify(tabs) });
+      await Preferences.set({ key: 'fenn_activeTab', value: activeTabId });
+      await Preferences.set({ key: 'fenn_bookmarks', value: JSON.stringify(bookmarks) });
+      await Preferences.set({ key: 'fenn_settings', value: JSON.stringify(settings) });
+    } catch(e) {
+      console.error('Save error:', e);
+    }
+  }
+  
+  // render tabs
+  function renderTabs() {
+    const container = document.getElementById('tabs');
+    container.innerHTML = tabs.map(t => `
+      <div class="tab ${t.id === activeTabId ? 'active' : ''}" onclick="switchTab('${t.id}')">
+        <div class="tab-favicon"></div>
+        <div class="tab-info">
+          <div class="tab-title">${t.title || 'New Tab'}</div>
+          <div class="tab-url">${t.url}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  // switch tab
+  function switchTab(id) {
+    haptic();
+    activeTabId = id;
+    const tab = tabs.find(t => t.id === id);
+    if (!tab) return;
+    
+    document.getElementById('content').innerHTML = `<iframe src="${tab.url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>`;
+    document.getElementById('urlBar').value = tab.url;
+    renderTabs();
+    updateBookmarkBtn();
+    saveState();
+  }
+  
+  // new tab
+  window.newTab = function() {
+    haptic();
+    const id = 'tab_' + Date.now();
+    tabs.push({ id, url: 'about:blank', title: 'New Tab', favicon: '' });
+    switchTab(id);
+    document.getElementById('searchBar').focus();
+  };
+  
+  // navigation
+  window.goBack = () => { haptic(); window.history.back(); };
+  window.goForward = () => { haptic(); window.history.forward(); };
+  window.reload = () => { haptic(); location.reload(); };
+  
+  // search/navigate
+  document.getElementById('searchBar').addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      haptic();
+      const query = e.target.value.trim();
+      if (!query) return;
+      
+      const url = query.includes('.') ? (query.startsWith('http') ? query : 'https://' + query) : ENGINES[settings.engine] + encodeURIComponent(query);
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab) {
+        tab.url = url;
+        tab.title = query;
+        switchTab(activeTabId);
+      }
+      e.target.value = '';
+    }
+  });
+  
+  document.getElementById('urlBar').addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      haptic();
+      const url = e.target.value.trim();
+      if (!url) return;
+      
+      const finalUrl = url.includes('.') ? (url.startsWith('http') ? url : 'https://' + url) : ENGINES[settings.engine] + encodeURIComponent(url);
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab) {
+        tab.url = finalUrl;
+        switchTab(activeTabId);
+      }
+    }
+  });
+  
+  // bookmarks
+  window.toggleBookmark = function() {
+    haptic();
+    const tab = tabs.find(t => t.id === activeTabId);
+    if (!tab) return;
+    
+    const exists = bookmarks.findIndex(b => b.url === tab.url);
+    if (exists >= 0) {
+      bookmarks.splice(exists, 1);
+    } else {
+      bookmarks.push({ url: tab.url, title: tab.title, favicon: tab.favicon });
+    }
+    updateBookmarkBtn();
+    saveState();
+  };
+  
+  function updateBookmarkBtn() {
+    const tab = tabs.find(t => t.id === activeTabId);
+    const exists = tab && bookmarks.some(b => b.url === tab.url);
+    document.getElementById('bookmarkBtn').textContent = exists ? '♥' : '♡';
+  }
+  
+  window.openBookmarks = function() {
+    haptic();
+    const list = document.getElementById('bookmarksList');
+    list.innerHTML = bookmarks.map((b, i) => `
+      <div class="bookmark-item">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:0.8rem">${b.title}</div>
+          <div style="font-size:0.65rem;color:var(--muted)">${b.url}</div>
+        </div>
+        <button class="nav-btn" onclick="removeBookmark(${i})">×</button>
+      </div>
+    `).join('');
+    document.getElementById('bookmarksPanel').classList.add('active');
+  };
+  
+  window.removeBookmark = function(i) {
+    haptic();
+    bookmarks.splice(i, 1);
+    openBookmarks();
+    saveState();
+  };
+  
+  // settings
+  window.openSettings = function() {
+    haptic();
+    document.getElementById('engineSelect').value = settings.engine;
+    document.getElementById('darkModeToggle').checked = settings.darkMode;
+    document.getElementById('sidebarToggle').checked = settings.sidebarHidden;
+    document.getElementById('settingsPanel').classList.add('active');
+  };
+  
+  window.saveSettings = function() {
+    settings.engine = document.getElementById('engineSelect').value;
+    saveState();
+  };
+  
+  window.toggleDarkMode = function() {
+    haptic();
+    settings.darkMode = document.getElementById('darkModeToggle').checked;
+    applySettings();
+    saveState();
+  };
+  
+  window.toggleSidebar = function() {
+    haptic();
+    settings.sidebarHidden = document.getElementById('sidebarToggle').checked;
+    applySettings();
+    saveState();
+  };
+  
+  function applySettings() {
+    document.getElementById('sidebar').classList.toggle('hidden', settings.sidebarHidden);
+    // dark mode would update CSS vars here
+  }
+  
+  window.closePanel = function(id) {
+    haptic();
+    document.getElementById(id).classList.remove('active');
+  };
+  
+  // init
+  loadState();
+</script>
+
+</body>
+</html>
