@@ -44,8 +44,8 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew wrapper --gradle-version=8.2.1
-          ./gradlew clean
+          mkdir -p ~/.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk18on/1.79
+          wget -O ~/.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk18on/1.79/bcprov-jdk18on-1.79.jar https://repo1.maven.org/maven2/org/bouncycastle/bcprov-jdk18on/1.79/bcprov-jdk18on-1.79.jar
           ./gradlew assembleRelease --no-daemon
 
       - name: Rename APK
