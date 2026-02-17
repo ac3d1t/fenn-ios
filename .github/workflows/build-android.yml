@@ -35,7 +35,7 @@ jobs:
 
       - name: Initialize Capacitor
         run: |
-          npm install @capacitor/android
+          npm install @capacitor/android --legacy-peer-deps
           npx cap init fenn com.ac3d1t.fenn --web-dir=www
           npx cap add android
           npx cap sync android
