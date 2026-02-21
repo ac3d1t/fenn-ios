@@ -25,17 +25,23 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm install
-
-      # STEP A: Build your web project (This creates the 'www' or 'dist' folder)
-      - name: Build Web Assets
-        run: npm run build --if-present
-
-      # STEP B: Create the missing Android folder 
-      # I'm using 'npx cap add android' as a guess for Capacitor projects
-      # If you use a different framework, change this line!
-      - name: Sync Android Platform
         run: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Build Web Assets
+        run: |
+          # Create a dummy 'www' folder if your build command doesn't exist
+          # Capacitor requires a web folder to exist before it will sync
+          mkdir -p www
+          npm run build --if-present
+
+      - name: Initialize and Sync Capacitor
+        run: |
+          # This forces a config if capacitor.config.json is missing
+          if [ ! -f "capacitor.config.json" ]; then
+            npx cap init Fenn com.fenn.app --web-dir www
+          fi
           npx cap add android || true
           npx cap sync android
 
@@ -52,4 +58,3 @@ jobs:
         with:
           name: fenn-android-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-        
