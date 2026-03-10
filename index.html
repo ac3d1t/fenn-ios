@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fenn browser</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #e0e5ec;
+            color: #888;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 210px;
+            background: #e0e5ec;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            box-shadow: 
+                8px 8px 16px rgba(163, 177, 198, 0.6),
+                -8px -8px 16px rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-header {
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 20px;
+            color: #333;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            text-shadow: 
+                1px 1px 2px rgba(255, 255, 255, 0.8),
+                -1px -1px 2px rgba(163, 177, 198, 0.4);
+        }
+
+        .sidebar-search {
+            width: 100%;
+            padding: 10px 14px;
+            background: #e0e5ec;
+            border: none;
+            border-radius: 12px;
+            color: #666;
+            font-size: 13px;
+            box-shadow: 
+                inset 4px 4px 8px rgba(163, 177, 198, 0.5),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+            outline: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-search::placeholder {
+            color: #aaa;
+        }
+
+        .sidebar-search:focus {
+            box-shadow: 
+                inset 6px 6px 10px rgba(163, 177, 198, 0.6),
+                inset -6px -6px 10px rgba(255, 255, 255, 0.6);
+        }
+
+        .tabs-section {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-bottom {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #e0e5ec;
+            border: none;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 
+                4px 4px 8px rgba(163, 177, 198, 0.5),
+                -4px -4px 8px rgba(255, 255, 255, 0.8);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-btn:active {
+            box-shadow: 
+                inset 3px 3px 6px rgba(163, 177, 198, 0.5),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-btn:hover {
+            color: #4a9eff;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #e0e5ec;
+            border-radius: 20px 0 0 20px;
+            overflow: hidden;
+            margin: 12px 12px 12px 0;
+            box-shadow: 
+                -8px -8px 16px rgba(255, 255, 255, 0.5),
+                8px 8px 16px rgba(163, 177, 198, 0.6);
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 12px;
+            background: #e0e5ec;
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #e0e5ec;
+            border: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 
+                3px 3px 6px rgba(163, 177, 198, 0.5),
+                -3px -3px 6px rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-btn:hover {
+            color: #333;
+        }
+
+        .nav-btn:active {
+            box-shadow: 
+                inset 2px 2px 4px rgba(163, 177, 198, 0.5),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .url-bar {
+            flex: 1;
+            padding: 8px 14px;
+            background: #e0e5ec;
+            border: none;
+            border-radius: 10px;
+            color: #666;
+            font-size: 13px;
+            outline: none;
+            box-shadow: 
+                inset 3px 3px 6px rgba(163, 177, 198, 0.5),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.5);
+            transition: all 0.3s;
+        }
+
+        .url-bar::placeholder {
+            color: #aaa;
+        }
+
+        .url-bar:focus {
+            box-shadow: 
+                inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.6);
+        }
+
+        .fav-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #e0e5ec;
+            border: none;
+            color: #4a9eff;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 
+                3px 3px 6px rgba(163, 177, 198, 0.5),
+                -3px -3px 6px rgba(255, 255, 255, 0.8);
+            transition: all 0.2s;
+        }
+
+        .fav-btn:active {
+            box-shadow: 
+                inset 2px 2px 4px rgba(163, 177, 198, 0.5),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 30px;
+            background: #e0e5ec;
+        }
+
+        .browser-frame {
+            display: none;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            border-radius: 12px;
+            margin: 0 12px 12px 12px;
+            box-shadow: 
+                inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        .browser-frame.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="title">fenn</div>
+            </div>
+            
+            <input 
+                type="text" 
+                class="sidebar-search" 
+                placeholder="search the web..."
+                id="sidebarSearch"
+            >
+
+            <div class="tabs-section">
+                <!-- tabs would go here -->
+            </div>
+
+            <div class="sidebar-bottom">
+                <button class="sidebar-btn" id="favoritesBtn" title="favorites">♥</button>
+                <button class="sidebar-btn" id="settingsBtn" title="settings">⚙</button>
+                <button class="sidebar-btn" id="addBtn" title="new tab">+</button>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="top-bar">
+                <div class="nav-btns">
+                    <button class="nav-btn" id="backBtn">‹</button>
+                    <button class="nav-btn" id="forwardBtn">›</button>
+                    <button class="nav-btn" id="refreshBtn">↻</button>
+                </div>
+                
+                <input 
+                    type="text" 
+                    class="url-bar" 
+                    id="urlBar"
+                    placeholder="search or enter website"
+                >
+
+                <button class="fav-btn" id="favoriteBtn">♡</button>
+            </div>
+
+            <div class="content-area" id="contentArea">
+                <!-- empty state content would go here -->
+            </div>
+
+            <iframe class="browser-frame" id="browserFrame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const urlBar = document.getElementById('urlBar');
+        const sidebarSearch = document.getElementById('sidebarSearch');
+        const browserFrame = document.getElementById('browserFrame');
+        const contentArea = document.getElementById('contentArea');
+        const backBtn = document.getElementById('backBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+
+        let currentUrl = '';
+        let history = [];
+        let historyIndex = -1;
+
+        function navigateToUrl(query) {
+            if (!query) return;
+            
+            let url = query;
+            
+            if (!query.startsWith('http://') && !query.startsWith('https://')) {
+                if (query.includes('.')) {
+                    url = 'https://' + query;
+                } else {
+                    url = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+                }
+            }
+            
+            browserFrame.src = url;
+            urlBar.value = url;
+            currentUrl = url;
+            
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            history.push(url);
+            historyIndex = history.length - 1;
+            
+            contentArea.style.display = 'none';
+            browserFrame.classList.add('active');
+        }
+
+        urlBar.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                navigateToUrl(urlBar.value.trim());
+            }
+        });
+
+        sidebarSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                navigateToUrl(sidebarSearch.value.trim());
+            }
+        });
+
+        backBtn.addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                const url = history[historyIndex];
+                browserFrame.src = url;
+                urlBar.value = url;
+                currentUrl = url;
+            }
+        });
+
+        forwardBtn.addEventListener('click', () => {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                const url = history[historyIndex];
+                browserFrame.src = url;
+                urlBar.value = url;
+                currentUrl = url;
+            }
+        });
+
+        refreshBtn.addEventListener('click', () => {
+            if (currentUrl) {
+                browserFrame.src = currentUrl;
+            }
+        });
+
+        document.getElementById('favoriteBtn').addEventListener('click', () => {
+            if (currentUrl) {
+                alert('added to favorites: ' + currentUrl);
+            }
+        });
+
+        document.getElementById('favoritesBtn').addEventListener('click', () => {
+            alert('favorites list would show here');
+        });
+
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            alert('settings panel would open here');
+        });
+
+        document.getElementById('addBtn').addEventListener('click', () => {
+            contentArea.style.display = 'flex';
+            browserFrame.classList.remove('active');
+            browserFrame.src = '';
+            urlBar.value = '';
+            sidebarSearch.value = '';
+            currentUrl = '';
+        });
+
+        browserFrame.addEventListener('load', () => {
+            try {
+                const frameUrl = browserFrame.contentWindow.location.href;
+                if (frameUrl && frameUrl !== 'about:blank') {
+                    urlBar.value = frameUrl;
+                    currentUrl = frameUrl;
+                }
+            } catch (e) {
+                // cross origin error, ignore
+            }
+        });
+    </script>
+</body>
+</html>
