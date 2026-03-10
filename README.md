@@ -118,6 +118,10 @@ fenn-ios/
 **Can't install IPA:**
 - Make sure device is in Developer Mode (Settings → Privacy & Security → Developer Mode)
 - For AltStore, ensure WiFi sync is enabled in iTunes
+  
+**Final Precautions**
+- If the app doesnt work, visit the website () and press share (iOS) and then find "add to home screen" to make it a web app.
+- ![IMG_1859](https://github.com/user-attachments/assets/97073531-642e-4d11-8f09-652fa0748647)
 
 ## License
 
